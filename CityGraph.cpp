@@ -1,9 +1,9 @@
 #include "CityGraph.h"
-#include <queue>
-#include <limits>
 #include <algorithm>
-#include <set>
 #include <functional>
+#include <limits>
+#include <queue>
+#include <set>
 
 /**
  * @brief Constructs the Pune city road network with 10 locations and 20 bidirectional roads.
@@ -12,28 +12,29 @@
  * Pune Station, Shivajinagar, Swargate, Deccan, Kothrud,
  * Hinjewadi, Pune Airport, Viman Nagar, Koregaon Park, Hadapsar
  */
-CityGraph::CityGraph() {
+CityGraph::CityGraph()
+{
     // 20 Bidirectional Roads with realistic distances in kilometers
-    addRoad("Pune Station",  "Koregaon Park",  3.0);  // Road 1
-    addRoad("Pune Station",  "Shivajinagar",   4.5);  // Road 2
-    addRoad("Pune Station",  "Swargate",       4.0);  // Road 3
-    addRoad("Pune Station",  "Deccan",         5.0);  // Road 4
-    addRoad("Pune Station",  "Viman Nagar",    8.0);  // Road 5
-    addRoad("Shivajinagar",  "Deccan",         2.5);  // Road 6
-    addRoad("Shivajinagar",  "Kothrud",        6.5);  // Road 7
-    addRoad("Shivajinagar",  "Hinjewadi",     14.0);  // Road 8
-    addRoad("Shivajinagar",  "Koregaon Park",  6.0);  // Road 9
-    addRoad("Swargate",      "Deccan",         4.0);  // Road 10
-    addRoad("Swargate",      "Hadapsar",      10.0);  // Road 11
-    addRoad("Swargate",      "Kothrud",        9.0);  // Road 12
-    addRoad("Deccan",        "Kothrud",        4.5);  // Road 13
-    addRoad("Kothrud",       "Hinjewadi",     11.0);  // Road 14
-    addRoad("Pune Airport",  "Viman Nagar",    3.5);  // Road 15
-    addRoad("Pune Airport",  "Koregaon Park",  9.0);  // Road 16
-    addRoad("Pune Airport",  "Hadapsar",      12.0);  // Road 17
-    addRoad("Viman Nagar",   "Koregaon Park",  5.5);  // Road 18
-    addRoad("Koregaon Park", "Hadapsar",       7.5);  // Road 19
-    addRoad("Viman Nagar",   "Hadapsar",       9.5);  // Road 20
+    addRoad("Pune Station", "Koregaon Park", 3.0); // Road 1
+    addRoad("Pune Station", "Shivajinagar", 4.5);  // Road 2
+    addRoad("Pune Station", "Swargate", 4.0);      // Road 3
+    addRoad("Pune Station", "Deccan", 5.0);        // Road 4
+    addRoad("Pune Station", "Viman Nagar", 8.0);   // Road 5
+    addRoad("Shivajinagar", "Deccan", 2.5);        // Road 6
+    addRoad("Shivajinagar", "Kothrud", 6.5);       // Road 7
+    addRoad("Shivajinagar", "Hinjewadi", 14.0);    // Road 8
+    addRoad("Shivajinagar", "Koregaon Park", 6.0); // Road 9
+    addRoad("Swargate", "Deccan", 4.0);            // Road 10
+    addRoad("Swargate", "Hadapsar", 10.0);         // Road 11
+    addRoad("Swargate", "Kothrud", 9.0);           // Road 12
+    addRoad("Deccan", "Kothrud", 4.5);             // Road 13
+    addRoad("Kothrud", "Hinjewadi", 11.0);         // Road 14
+    addRoad("Pune Airport", "Viman Nagar", 3.5);   // Road 15
+    addRoad("Pune Airport", "Koregaon Park", 9.0); // Road 16
+    addRoad("Pune Airport", "Hadapsar", 12.0);     // Road 17
+    addRoad("Viman Nagar", "Koregaon Park", 5.5);  // Road 18
+    addRoad("Koregaon Park", "Hadapsar", 7.5);     // Road 19
+    addRoad("Viman Nagar", "Hadapsar", 9.5);       // Road 20
 }
 
 /**
@@ -42,7 +43,8 @@ CityGraph::CityGraph() {
  * Automatically registers unknown locations into names_, index_, and adj_.
  * Adds the edge in both directions to maintain an undirected graph.
  */
-void CityGraph::addRoad(const std::string& a, const std::string& b, double dist) {
+void CityGraph::addRoad(const std::string &a, const std::string &b, double dist)
+{
     // Auto-create location 'a' if not previously seen
     if (index_.find(a) == index_.end()) {
         int newIdx = static_cast<int>(names_.size());
@@ -70,14 +72,38 @@ void CityGraph::addRoad(const std::string& a, const std::string& b, double dist)
 /**
  * @brief Checks if a location exists in the graph.
  */
-bool CityGraph::hasLocation(const std::string& name) const {
+bool CityGraph::hasLocation(const std::string &name) const
+{
     return index_.find(name) != index_.end();
+}
+bool CityGraph::getRoadDistance(const std::string &from,
+                                const std::string &to,
+                                double &distance) const
+{
+    auto itFrom = index_.find(from);
+    auto itTo = index_.find(to);
+
+    if (itFrom == index_.end() || itTo == index_.end()) {
+        return false;
+    }
+
+    int target = itTo->second;
+
+    for (const auto &edge : adj_[itFrom->second]) {
+        if (edge.first == target) {
+            distance = edge.second;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
  * @brief Returns all registered location names in index order.
  */
-std::vector<std::string> CityGraph::locations() const {
+std::vector<std::string> CityGraph::locations() const
+{
     return names_;
 }
 
@@ -85,7 +111,8 @@ std::vector<std::string> CityGraph::locations() const {
  * @brief Standard shortest path query delegating to the overload with empty ban lists.
  * This guarantees a single, maintainable Dijkstra implementation.
  */
-Route CityGraph::shortestPath(const std::string& src, const std::string& dst) const {
+Route CityGraph::shortestPath(const std::string &src, const std::string &dst) const
+{
     return shortestPath(src, dst, {}, {});
 }
 
@@ -119,10 +146,11 @@ Route CityGraph::shortestPath(const std::string& src, const std::string& dst) co
  *    - If dist[dst] is infinity or parent[dst] == -1, destination is unreachable.
  *    - Otherwise, backtrack from dst using parent[] array to src, reverse path, and return.
  */
-Route CityGraph::shortestPath(const std::string& src, const std::string& dst,
-    const std::vector<std::pair<std::string,std::string>>& bannedEdges,
-    const std::vector<std::string>& bannedNodes) const {
-
+Route CityGraph::shortestPath(const std::string &src,
+                              const std::string &dst,
+                              const std::vector<std::pair<std::string, std::string>> &bannedEdges,
+                              const std::vector<std::string> &bannedNodes) const
+{
     // Step 1: Validate existence of source and destination
     auto itSrc = index_.find(src);
     auto itDst = index_.find(dst);
@@ -135,7 +163,7 @@ Route CityGraph::shortestPath(const std::string& src, const std::string& dst,
 
     // Step 2: Convert banned nodes to integer set for O(log B) lookups
     std::set<int> bannedNodeSet;
-    for (const auto& node : bannedNodes) {
+    for (const auto &node : bannedNodes) {
         auto it = index_.find(node);
         if (it != index_.end()) {
             bannedNodeSet.insert(it->second);
@@ -143,8 +171,8 @@ Route CityGraph::shortestPath(const std::string& src, const std::string& dst,
     }
 
     // If source or destination is banned, no valid path can exist
-    if (bannedNodeSet.find(srcIdx) != bannedNodeSet.end() ||
-        bannedNodeSet.find(dstIdx) != bannedNodeSet.end()) {
+    if (bannedNodeSet.find(srcIdx) != bannedNodeSet.end()
+        || bannedNodeSet.find(dstIdx) != bannedNodeSet.end()) {
         return Route{}; // valid = false
     }
 
@@ -159,7 +187,7 @@ Route CityGraph::shortestPath(const std::string& src, const std::string& dst,
 
     // Step 4: Convert banned edges to index pairs (bidirectional lookup)
     std::set<std::pair<int, int>> bannedEdgeSet;
-    for (const auto& edge : bannedEdges) {
+    for (const auto &edge : bannedEdges) {
         auto itU = index_.find(edge.first);
         auto itV = index_.find(edge.second);
         if (itU != index_.end() && itV != index_.end()) {
@@ -203,7 +231,7 @@ Route CityGraph::shortestPath(const std::string& src, const std::string& dst,
         }
 
         // Traverse all adjacent roads from vertex u
-        for (const auto& edge : adj_[u]) {
+        for (const auto &edge : adj_[u]) {
             int v = edge.first;
             double weight = edge.second;
 

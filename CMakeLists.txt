@@ -22,6 +22,8 @@ add_library(city_graph STATIC
     CityGraph.cpp
     CityGraph.h
     Route.h
+    AlternativeRoutes.h
+    AlternativeRoutes.cpp
 )
 
 # Set include directory to CityRouter root so tests can use #include "CityGraph.h"
@@ -36,5 +38,14 @@ add_executable(test_graph
 
 # Link test_graph to city_graph
 target_link_libraries(test_graph PRIVATE
+    city_graph
+)
+
+# Test executable for alternative routes
+add_executable(test_alternative_routes
+    test_alternative_routes.cpp
+)
+
+target_link_libraries(test_alternative_routes PRIVATE
     city_graph
 )
